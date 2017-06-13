@@ -6,4 +6,7 @@ Docker image for CyTube
 
 Usage:
 
-`docker run -d cytube/cytube-docker`
+```
+docker build -t cytube/cytube-docker .
+docker run -d cytube/cytube-docker
+```
