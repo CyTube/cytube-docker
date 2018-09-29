@@ -1,30 +1,71 @@
-FROM alpine:3.6
-
-ARG FROM_REPOSITORY=https://github.com/calzoneman/sync
-
-ADD scripts /scripts
-
-RUN sh /scripts/container-install.sh
-
-WORKDIR /app
+FROM alpine:3.8
 
 ENV MYSQL_HOST=localhost \
 	MYSQL_PORT=3306 \
-	MYSQL_DATABASE=cytube \
-	MYSQL_USER=cytube \
-	MYSQL_PASSWORD=nico_best_girl \
-	MYSQL_ROOT_PASSWORD=ruby_best_girl \
+	MYSQL_DATABASE=cytube3 \
+	MYSQL_USER=cytube3 \
+	MYSQL_PASSWORD=UltraSecretPass \
+	MYSQL_ROOT_PASSWORD=UltraSecretRootPass \
+	HTTP_PORT=8080 \
+	HTTP=true \
+	HTTPS_PORT=8443	\
+	HTTPS=false \
+	IO=true \
+	IO_PORT=1337 \
+	IO_DOMAIN=http://localhost \
+	ROOT_DOMAIN=localhost \
+	USE_MINIFY=false \
+	COOKIE_SECRET=change-me \
+	SYNC_CRTKEY=null \
+	SYNC_CRT=null \
+	SYNC_CRTCA=null \
 	SYNC_TITLE=Sync \
-	SYNC_DESCRIPTION="Sync Video" \
-	ROOT_URL=http://localhost:8080 \
-	ROOT_PORT=8080 \
-	IO_ROOT_URL=http://localhost \
-	IO_ROOT_PORT=1337 \
-	ROOT_DOMAIN=localhost:8080 \
-	HTTPS_ENABLED=false \
-	YOUTUBE_KEY=your_youtube_key \
-	TWITCH_CLIENT_ID=your_twitch_client_id
+	SYNC_DESCRIPTION="Free, open source synchtube" \
+	YOUTUBE_KEY=null \
+	CHANNEL_STORAGE=file \
+	VIMEO_WORKAROUND=false \
+	TWITCH_ID=null \
+	MIXER_ID=null \
+	LC_ALL=en_US.UTF-8
 
-EXPOSE 8080 1337
+RUN mkdir /docker-entrypoint-initdb.d && \
+	apk update && \
+	apk -U upgrade && \
+	apk add --no-cache mariadb mariadb-client && \
+	apk add --no-cache tzdata && \
+	apk add --no-cache build-base \
+	python \
+	git \
+	nodejs \
+	nodejs-npm \
+	curl \
+	gettext \
+	ffmpeg \
+	su-exec && \
+	# clean up
+	rm -rf /var/cache/apk/*
 
-CMD ["sh", "run.sh"]
+RUN sed -Ei 's/^(bind-address|log)/#&/' /etc/mysql/my.cnf && \
+	# don't reverse lookup hostnames, they are usually another container
+	sed -i '/^\[mysqld]$/a skip-host-cache\nskip-name-resolve' /etc/mysql/my.cnf && \
+	# always run as user mysql
+	sed -i '/^\[mysqld]$/a user=mysql' /etc/mysql/my.cnf && \
+	# allow custom configurations
+	echo -e '\n!includedir /etc/mysql/conf.d/' >> /etc/mysql/my.cnf && \
+	mkdir -p /etc/mysql/conf.d/
+
+VOLUME /var/lib/mysql
+
+ADD scripts /scripts
+
+RUN chmod +x /scripts/docker-entrypoint.sh
+
+RUN chmod +x /scripts/run.sh
+
+WORKDIR /home/cytube/app
+
+ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
+
+EXPOSE 8080 1337 3306
+
+CMD ["/scripts/run.sh"]
