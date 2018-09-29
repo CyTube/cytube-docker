@@ -66,6 +66,6 @@ WORKDIR /home/cytube/app
 
 ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
 
-EXPOSE 8080 1337 3306
+EXPOSE ${MYSQL_PORT} ${HTTP_PORT} ${HTTPS_PORT} ${IO_PORT}
 
 CMD ["/scripts/run.sh"]
