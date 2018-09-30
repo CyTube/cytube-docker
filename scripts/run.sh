@@ -16,7 +16,6 @@ cp -f /scripts/config.docker.yaml /home/cytube/app
 chown -R cytube: /home/cytube
 
 su-exec cytube npm install
-su-exec cytube npm run build-server
 
 envsubst < config.docker.yaml > config.yaml
 while :
