@@ -100,7 +100,7 @@ io:
   # you will want to set up a passthrough domain for socket.io.
   # If the root of this domain is not the same as the root of your HTTP domain
   # (or HTTPS if SSL is enabled), logins won't work.
-  domain: 'http://localhost'
+  domain: '${IO_DOMAIN}'
   # Even though you may specify multiple ports to listen on for HTTP above,
   # one port must be specified as default for the purposes of generating
   # links with the appropriate port
