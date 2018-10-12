@@ -80,7 +80,7 @@ https:
   # one port must be specified as default for the purposes of generating
   # links with the appropriate port
   default-port: ${HTTPS_PORT}
-  domain: 'https://${ROOT_DOMAIN}'
+  domain: '${IO_DOMAIN}'
   keyfile: '${SYNC_CRTKEY}'
   passphrase: ''
   certfile: '${SYNC_CRT}'
