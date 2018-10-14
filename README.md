@@ -1,3 +1,8 @@
+### NOTICE
+
+This repository is now out of date. These changes are being pushed to the mainline CyTube/cytube-docker repository.
+
+
 # cytube-docker
 
 Docker image for CyTube
