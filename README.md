@@ -1,64 +1,77 @@
-# sync-docker-compose
-Docker compose for sync by calzoneman
+# cytube-docker
 
-https://github.com/calzoneman/sync
+Docker image for CyTube
 
-## How to get started
+*This repository is currently very alpha and a work in progress*
 
-To run this application first you must clone the repo.
+This image uses an Alpine image as a base along with an integrated MariaDB instance, to create a dockerfile/image that could be used for production deployments. This image results in a running instance of Cytube built from a specified commit. Various parts of the config.yaml template have been replaced with environment variables, to allow deployment to be easily adjusted for production. The following environment variables are set in the dockerfile:
 
-Next you will need to run get_latest_configs.sh in order to automatically pull the latest versions of the config from the sync repo. You may also choose to do this manually. You will need the conf/example and a config.yaml files so that they can be mounted into the container. The script is there to make this easier for you by downloading the necessary files.
-
-After you have the files, open the config.yaml file and edit the information in the config to meet your specific needs.
-calzoneman has thoroughly commented the file to give you a good idea of what needs to be edited.
-
-After editting your config.yaml file you will need to edit the docker-compose.yml to match what you have entered in the config.yaml file. It is commented to give you an idea of what needs to be editted.
-
-When you have finished the previous steps start the containers by running ```docker-compose up -d``` this will cause docker-compose to build the Dockerfile and start the sync and mariadb/mysql containers.
-
-## docker-compose.yml
-
-This is the docker-compose.yml file, in this file you will need to update the environmental variables, ports, paths to your certificate files (if using SSL) and the path to your config file. Failure to update this will cause sync/cytube to not start.
-The file has comments to help you edit what is necessary.
 ```
-version: "3.7"
-services:
-   sync:
-     build: .
-     depends_on:
-       - "mysql"
-     ports:
-# Change these ports to match your application settings defined in config.yaml
-       - "8980:8080"
-       - "1337:1337"
-       - "8443:8443"
-     volumes:
-# Change the path to import your certificates for SSL
-       - "./certs:/etc/certs"
-# Change this path to import your config.yaml into the container. 
-# By default it is in the same folder as the docker-compose.yml file.
-       - "./config.yaml:/home/syncuser/sync/config.yaml"
-# If you plan on using a reverse proxy please add the name of your docker network which contains the proxy.
-# An example is provided in the Readme.
-     networks:
-        - sync_internal
-   mysql:
-     image: mariadb:10.5.1
-     environment:
-# Change these environmental variables to match what is in your config.yaml
-       - MYSQL_ROOT_PASSWORD=sync 
-       - MYSQL_DATABASE=cytube3 
-       - MYSQL_USER=cytube3
-       - MYSQL_PASSWORD=super_secure_password
-     volumes:
-# This will create and mount the mysql files in the same folder as the docker-compose.yml file.
-# You can change this to be anywhere.
-# This will provide data persistence to your MariaDB database.
-       - "./mysql:/var/lib/mysql"      
-     networks:
-       - sync_internal
-# If you are using a reverse proxy please do not forget to add the network here as well.
-# Refer to the Readme for more information regarding using a Reverse Proxy.
-networks:
-  sync_internal:
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=cytube3
+MYSQL_USER=cytube3
+MYSQL_PASSWORD=UltraSecretPass
+MYSQL_ROOT_PASSWORD=UltraSecretRootPass
+HTTP_PORT=80
+HTTP=true
+HTTPS_PORT=443
+HTTPS=false
+IO=true
+IO_PORT=1337
+IO_DOMAIN=http://localhost
+ROOT_DOMAIN=localhost
+USE_MINIFY=false
+COOKIE_SECRET=change-me
+SYNC_CRTKEY=null
+SYNC_CRT=null
+SYNC_CRTCA=null
+SYNC_TITLE=Sync
+SYNC_DESCRIPTION="Free, open source synchtube"
+YOUTUBE_KEY=null
+CHANNEL_STORAGE=file
+VIMEO_WORKAROUND=false
+TWITCH_ID=null
+MIXER_ID=null
+GIT_COMMIT=0bc866dbfaba0ef09dc703d6ef261bdf2e70b2ff
+```
+
+If you will be using the local mysql instance and are using it for production, you will want to specify a bind mount to ensure that your user and channel information is retained across deployments. The Alpine-based MariaDB image is a drop-in replacement for the official MariaDB image, so you can reference their page for further documentation:
+
+https://hub.docker.com/_/mariadb/
+
+This will soon be updated with the option to not install and run MariaDB, which will be the most ideal for those using this for production with a remote sql server. A cluster environment is to follow, likely with Compose and/or Kubernetes, as well as a dev tag/branch.
+
+Build:
+
+```
+docker build -t cytube-docker .
+```
+
+Deploy Examples:
+
+```
+docker run --name cytube-dev -ti -p 80:80 -p 1337:1337 cytube-docker
+```
+
+```
+docker run --name cytube-live -ti \
+	-p 443:443 -p 1337:1337 \
+	-v /home/user/mysqlstore:/var/lib/mysql \
+	-v /home/user/certs:/home/cytube/certs \
+	-e MYSQL_PASSWORD=SecretPass \
+	-e MYSQL_ROOT_PASSWORD=RootPass \
+	-e HTTP=false \
+	-e HTTPS=true \
+	-e IO_DOMAIN=https://site.com \
+	-e ROOT_DOMAIN=site.com \
+	-e COOKIE_SECRET=me-change \
+	-e SYNC_CRTKEY=/home/cytube/certs/crt.key \
+	-e SYNC_CRT=/home/cytube/certs/crt.crt \
+	-e SYNC_CRTCA=/home/cytube/certs/ca.crt \
+	-e SYNC_TITLE=Dync \
+	-e YOUTUBE_KEY=SecretYoutubeKey \
+	-e TWITCH_ID=SecretTwitchKey \
+	-e MIXER_ID=SecretMixerKey \
+	-d cytube-docker
 ```
