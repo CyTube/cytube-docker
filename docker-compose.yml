@@ -5,33 +5,38 @@ services:
      depends_on:
        - "mysql"
      ports:
-# CHANGE TO MATCH YOUR CONFIG/PROXY
+# Change these ports to match your application settings defined in config.yaml
        - "8980:8080"
        - "1337:1337"
        - "8443:8443"
      volumes:
-# CHANGE TO IMPORT YOUR CERTS LOCATION
+# Change the path to import your certificates for SSL
        - "./certs:/etc/certs"
-# CHANGE TO IMPORT YOUR CONFIG FILE
+# Change this path to import your config.yaml into the container. 
+# By default it is in the same folder as the docker-compose.yml file.
        - "./config.yaml:/home/syncuser/sync/config.yaml"
-#  UNCOMMENT IF YOU PLAN ON USING A REVERSE PROXY - YOU MUST UPDATE THIS TO MATCH YOUR PROXY NETWORK       
+# If you will be using any of the auxillary configs (camo, email, prometheus) please uncomment the next line
+#       - "./conf:/home/syncuser/sync/conf"
+# If you plan on using a reverse proxy please add the name of your docker network which contains the proxy.
+# An example is provided in the Readme.
      networks:
-#       - nginx
         - sync_internal
    mysql:
      image: mariadb:10.5.1
      environment:
-# CHANGE THESE TO MATCH THE CONFIG FILE
+# Change these environmental variables to match what is in your config.yaml
        - MYSQL_ROOT_PASSWORD=sync 
        - MYSQL_DATABASE=cytube3 
        - MYSQL_USER=cytube3
        - MYSQL_PASSWORD=super_secure_password
      volumes:
-# THIS WILL MOUNT TO THE SAME FOLDER YOU RUN DOCKER-COMPOSE UP -D FROM CHANGE IF NEEDED
+# This will create and mount the mysql files in the same folder as the docker-compose.yml file.
+# You can change this to be anywhere.
+# This will provide data persistence to your MariaDB database.
        - "./mysql:/var/lib/mysql"      
      networks:
        - sync_internal
+# If you are using a reverse proxy please do not forget to add the network here as well.
+# Refer to the Readme for more information regarding using a Reverse Proxy.
 networks:
-#  nginx:
-#    external: true
   sync_internal:
