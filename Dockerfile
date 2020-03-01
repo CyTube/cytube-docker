@@ -1,4 +1,4 @@
-from node:13.8
+from node:latest
 
 CMD apt update && apt upgrade -y && apt install build-essential git -y
 
