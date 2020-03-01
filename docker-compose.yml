@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+   sync:
+     build: .
+     depends_on:
+       - "mysql"
+     ports:
+# CHANGE TO MATCH YOUR CONFIG/PROXY
+       - "8980:8080"
+       - "1337:1337"
+       - "8443:8443"
+     volumes:
+# CHANGE TO IMPORT YOUR CERTS LOCATION
+       - "./certs:/etc/certs"
+# CHANGE TO IMPORT YOUR CONFIG FILE
+       - "./config.yaml:/home/syncuser/sync/config.yaml"
+#  UNCOMMENT IF YOU PLAN ON USING A REVERSE PROXY - YOU MUST UPDATE THIS TO MATCH YOUR PROXY NETWORK       
+     networks:
+#       - nginx
+        - sync_internal
+   mysql:
+     image: mariadb:10.5.1
+     environment:
+# CHANGE THESE TO MATCH THE CONFIG FILE
+       - MYSQL_ROOT_PASSWORD=sync 
+       - MYSQL_DATABASE=cytube3 
+       - MYSQL_USER=cytube3
+       - MYSQL_PASSWORD=super_secure_password
+     volumes:
+# THIS WILL MOUNT TO THE SAME FOLDER YOU RUN DOCKER-COMPOSE UP -D FROM CHANGE IF NEEDED
+       - "./mysql:/var/lib/mysql"      
+     networks:
+       - sync_internal
+networks:
+#  nginx:
+#    external: true
+  sync_internal:
