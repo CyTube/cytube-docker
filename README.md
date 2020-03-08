@@ -42,7 +42,7 @@ server {
 
 If you already have a reverse proxy in place such as Nginx you must add the network to the sync container in the docker-compose.yml file.
 
-Example Configuration with a Reverse Proxy:
+Example docker-compose.yml configuration with a Reverse Proxy:
 
 ```
 version: "3.7"
