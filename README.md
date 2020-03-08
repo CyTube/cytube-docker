@@ -7,7 +7,7 @@ https://github.com/calzoneman/sync
 
 To run this application first you must clone the repo.
 
-Next you will need to run get_latest_configs.sh in order to automatically pull the latest versions of the config from the sync repo. You may also choose to do this manually. You will need the conf/example and a config.yaml files so that they can be mounted into the container. The script is there to make this easier for you by downloading the necessary files.
+Next you will need to run copy_config.sh in order to automatically copy the latest versions of the config from the sync folder. You may also choose to do this manually. You will need the conf/example and a config.yaml files so that they can be mounted into the container. The script is there to make this easier for you by downloading the necessary files.
 
 After you have the files, open the config.yaml file and edit the information in the config to meet your specific needs.
 calzoneman has thoroughly commented the file to give you a good idea of what needs to be edited.
