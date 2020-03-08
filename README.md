@@ -12,7 +12,7 @@ Next you will need to run copy_config.sh in order to automatically copy the late
 After you have the files, open the config.yaml file and edit the information in the config to meet your specific needs.
 calzoneman has thoroughly commented the file to give you a good idea of what needs to be edited.
 
-After editting your config.yaml file you will need to edit the docker-compose.yml to match what you have entered in the config.yaml file. It is commented to give you an idea of what needs to be editted.
+After editing your config.yaml file you will need to edit the docker-compose.yml to match what you have entered in the config.yaml file. It is commented to give you an idea of what needs to be edited.
 
 When you have finished the previous steps start the containers by running ```docker-compose up -d``` this will cause docker-compose to build the Dockerfile and start the sync and mariadb/mysql containers.
 
