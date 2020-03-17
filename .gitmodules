@@ -1,0 +1,3 @@
+[submodule "sync"]
+	path = sync
+	url = https://github.com/calzoneman/sync.git

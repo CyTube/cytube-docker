@@ -1,77 +1,81 @@
-# cytube-docker
+# sync-docker-compose
+Docker compose for sync by calzoneman
 
-Docker image for CyTube
+https://github.com/calzoneman/sync
 
-*This repository is currently very alpha and a work in progress*
+## How to get started
 
-This image uses an Alpine image as a base along with an integrated MariaDB instance, to create a dockerfile/image that could be used for production deployments. This image results in a running instance of Cytube built from a specified commit. Various parts of the config.yaml template have been replaced with environment variables, to allow deployment to be easily adjusted for production. The following environment variables are set in the dockerfile:
+To run this application first you must clone the repo using ```git clone --recursive https://github.com/Aersaud/cytube-docker.git```
 
-```
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_DATABASE=cytube3
-MYSQL_USER=cytube3
-MYSQL_PASSWORD=UltraSecretPass
-MYSQL_ROOT_PASSWORD=UltraSecretRootPass
-HTTP_PORT=80
-HTTP=true
-HTTPS_PORT=443
-HTTPS=false
-IO=true
-IO_PORT=1337
-IO_DOMAIN=http://localhost
-ROOT_DOMAIN=localhost
-USE_MINIFY=false
-COOKIE_SECRET=change-me
-SYNC_CRTKEY=null
-SYNC_CRT=null
-SYNC_CRTCA=null
-SYNC_TITLE=Sync
-SYNC_DESCRIPTION="Free, open source synchtube"
-YOUTUBE_KEY=null
-CHANNEL_STORAGE=file
-VIMEO_WORKAROUND=false
-TWITCH_ID=null
-MIXER_ID=null
-GIT_COMMIT=0bc866dbfaba0ef09dc703d6ef261bdf2e70b2ff
-```
+Next you will need to run copy_config.sh in order to automatically copy the latest versions of the config from the sync folder. You may also choose to do this manually. You will need the conf/example and a config.yaml files so that they can be mounted into the container. The script is there to make this easier for you by downloading the necessary files.
 
-If you will be using the local mysql instance and are using it for production, you will want to specify a bind mount to ensure that your user and channel information is retained across deployments. The Alpine-based MariaDB image is a drop-in replacement for the official MariaDB image, so you can reference their page for further documentation:
+After you have the files, open the config.yaml file and edit the information in the config to meet your specific needs.
+calzoneman has thoroughly commented the file to give you a good idea of what needs to be edited.
 
-https://hub.docker.com/_/mariadb/
+After editing your config.yaml file you will need to edit the docker-compose.yml to match what you have entered in the config.yaml file. It is commented to give you an idea of what needs to be edited.
 
-This will soon be updated with the option to not install and run MariaDB, which will be the most ideal for those using this for production with a remote sql server. A cluster environment is to follow, likely with Compose and/or Kubernetes, as well as a dev tag/branch.
+When you have finished the previous steps start the containers by running ```docker-compose up -d``` this will cause docker-compose to build the Dockerfile and start the sync and mariadb/mysql containers.
 
-Build:
+## Nginx Reverse Proxy Config
+
+Here is an example config for using Nginx to reverse proxy sync using https on port 8443.
 
 ```
-docker build -t cytube-docker .
+server {
+
+    listen 443 ssl http2;
+    server_name sync.example.com;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+
+        location / {
+                proxy_pass https://sync:8443;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header Host $http_host;
+                   }
+}
 ```
 
-Deploy Examples:
+If you already have a reverse proxy in place such as Nginx you must add the network to the sync container in the docker-compose.yml file.
+
+Example docker-compose.yml configuration with a Reverse Proxy:
 
 ```
-docker run --name cytube-dev -ti -p 80:80 -p 1337:1337 cytube-docker
-```
-
-```
-docker run --name cytube-live -ti \
-	-p 443:443 -p 1337:1337 \
-	-v /home/user/mysqlstore:/var/lib/mysql \
-	-v /home/user/certs:/home/cytube/certs \
-	-e MYSQL_PASSWORD=SecretPass \
-	-e MYSQL_ROOT_PASSWORD=RootPass \
-	-e HTTP=false \
-	-e HTTPS=true \
-	-e IO_DOMAIN=https://site.com \
-	-e ROOT_DOMAIN=site.com \
-	-e COOKIE_SECRET=me-change \
-	-e SYNC_CRTKEY=/home/cytube/certs/crt.key \
-	-e SYNC_CRT=/home/cytube/certs/crt.crt \
-	-e SYNC_CRTCA=/home/cytube/certs/ca.crt \
-	-e SYNC_TITLE=Dync \
-	-e YOUTUBE_KEY=SecretYoutubeKey \
-	-e TWITCH_ID=SecretTwitchKey \
-	-e MIXER_ID=SecretMixerKey \
-	-d cytube-docker
+version: "3.7"
+services:
+   sync:
+     build: .
+     depends_on:
+       - "mysql"
+     ports:
+       - "8980:8080"
+       - "1337:1337"
+       - "8443:8443"
+     volumes:
+       - "./certs:/etc/certs"
+       - "./config.yaml:/home/syncuser/sync/config.yaml"
+     networks:
+        - sync_internal
+# This is an example of the network where the nginx is located
+        - my_reverse_proxy_network
+   mysql:
+     image: mariadb:10.5.1
+     environment:
+       - MYSQL_ROOT_PASSWORD=sync 
+       - MYSQL_DATABASE=cytube3 
+       - MYSQL_USER=cytube3
+       - MYSQL_PASSWORD=super_secure_password
+     volumes:
+       - "./mysql:/var/lib/mysql"      
+     networks:
+       - sync_internal
+networks:
+  sync_internal:
+# You must also add the network here and clarify that the network is external from this docker-compose.yml file
+  my_reverse_proxy_network:
+    external: true
 ```
