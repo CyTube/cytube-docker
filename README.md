@@ -3,6 +3,10 @@ Docker compose for sync by calzoneman
 
 https://github.com/calzoneman/sync
 
+## Disclaimer
+
+This image is not officially supported by the main CyTube developers.  It is maintained by third party contributors.  Feel free to submit pull requests if you'd like to fix or improve the image.
+
 ## How to get started
 
 To run this application first you must clone the repo using ```git clone --recursive https://github.com/Aersaud/cytube-docker.git```
