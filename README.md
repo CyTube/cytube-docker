@@ -1,4 +1,4 @@
-# sync-docker-compose
+# cytube-docker
 Docker compose for sync by calzoneman
 
 https://github.com/calzoneman/sync
@@ -6,6 +6,8 @@ https://github.com/calzoneman/sync
 ## Disclaimer
 
 This image is not officially supported by the main CyTube developers.  It is maintained by third party contributors.  Feel free to submit pull requests if you'd like to fix or improve the image.
+
+The image cytube/cytube:latest is automatically built from the master branch at GitHub. That branch is intended to stay stable, and will not be updated until the changes have been tested in another branch/image. We suggest using the latest tag in production. The develop image (cytube/cytube:develop) is automatically built from the develop branch at GitHub. We advise against using the develop tag in production.
 
 ## How to get started
 
