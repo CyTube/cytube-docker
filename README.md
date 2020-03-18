@@ -9,7 +9,7 @@ This image is not officially supported by the main CyTube developers.  It is mai
 
 ## How to get started
 
-To run this application first you must clone the repo using ```git clone --recursive https://github.com/Aersaud/cytube-docker.git```
+To run this application first you must clone the repo using ```git clone --recursive https://github.com/CyTube/cytube-docker.git```
 
 Next you will need to run copy_config.sh in order to automatically copy the latest versions of the config from the sync folder. You may also choose to do this manually. You will need the conf/example and a config.yaml files so that they can be mounted into the container. The script is there to make this easier for you by downloading the necessary files.
 
